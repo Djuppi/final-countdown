@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE FINAL COUNTDOWN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --cyan: #00e5ff;
+  --orange: #ff6b35;
+  --purple: #7b2fff;
+  --bg: #000510;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  background: var(--bg);
+  overflow: hidden;
+  font-family: 'Orbitron', 'Courier New', monospace;
+}
+
+#starfield { position: fixed; inset: 0; z-index: 0; }
+
+.nebula {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 40% at 18% 28%, rgba(123,47,255,.18) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 30% at 82% 72%, rgba(255,107,53,.12) 0%, transparent 65%),
+    radial-gradient(ellipse 70% 50% at 50% 50%, rgba(0,229,255,.06) 0%, transparent 80%);
+}
+
+.scanlines {
+  position: fixed; inset: 0; z-index: 2; pointer-events: none;
+  background: repeating-linear-gradient(to bottom,
+    transparent 0px, transparent 3px,
+    rgba(0,0,0,.09) 3px, rgba(0,0,0,.09) 4px);
+}
+
+.vignette {
+  position: fixed; inset: 0; z-index: 3; pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(0,5,16,.85) 100%);
+}
+
+/* ── MAIN LAYOUT ── */
+.main {
+  position: relative; z-index: 10;
+  height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: clamp(1rem, 2.5vh, 2rem);
+}
+
+/* ── TITLE ── */
+.title {
+  font-size: clamp(1rem, 3.5vw, 2.6rem);
+  font-weight: 900;
+  letter-spacing: .45em;
+  color: var(--orange);
+  text-shadow: 0 0 10px var(--orange), 0 0 35px var(--orange), 0 0 70px rgba(255,107,53,.5);
+  animation: titlePulse 3s ease-in-out infinite;
+  text-align: center;
+}
+
+.subtitle {
+  font-size: clamp(.5rem, 1.2vw, .85rem);
+  letter-spacing: .8em;
+  color: rgba(255,255,255,.3);
+  text-align: center;
+}
+
+@keyframes titlePulse {
+  0%,100% { text-shadow: 0 0 10px var(--orange), 0 0 35px var(--orange), 0 0 70px rgba(255,107,53,.5); }
+  50%      { text-shadow: 0 0 18px var(--orange), 0 0 55px var(--orange), 0 0 110px rgba(255,107,53,.75); }
+}
+
+/* ── CLOCK ── */
+.clock {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(.3rem, 1.5vw, 1.8rem);
+}
+
+.unit {
+  display: flex; flex-direction: column;
+  align-items: center; gap: .5rem;
+}
+
+.digit-box {
+  position: relative;
+  padding: clamp(.3rem, .8vw, .6rem) clamp(.5rem, 1.2vw, 1rem);
+  background: rgba(0,229,255,.03);
+  border: 1px solid rgba(0,229,255,.18);
+  border-radius: 6px;
+  box-shadow: inset 0 0 25px rgba(0,229,255,.04), 0 0 25px rgba(0,229,255,.12);
+  overflow: hidden;
+}
+
+.digit-box::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(0,229,255,.07) 0%, transparent 50%, rgba(0,229,255,.03) 100%);
+  pointer-events: none;
+}
+
+.number {
+  font-size: clamp(2.8rem, 11vw, 9rem);
+  font-weight: 900;
+  color: var(--cyan);
+  text-shadow: 0 0 12px var(--cyan), 0 0 35px var(--cyan), 0 0 65px rgba(0,229,255,.45);
+  line-height: 1;
+  min-width: 2ch; text-align: center;
+  position: relative;
+}
+
+.number.flash {
+  animation: flash .35s ease-out forwards;
+}
+
+@keyframes flash {
+  0%   { color: #fff; text-shadow: 0 0 25px #fff, 0 0 60px var(--cyan), 0 0 100px var(--cyan); transform: scale(1.06); }
+  100% { color: var(--cyan); text-shadow: 0 0 12px var(--cyan), 0 0 35px var(--cyan); transform: scale(1); }
+}
+
+.label {
+  font-size: clamp(.4rem, .9vw, .7rem);
+  font-weight: 400;
+  letter-spacing: .45em;
+  color: rgba(255,255,255,.32);
+}
+
+.separator {
+  font-size: clamp(1.8rem, 7vw, 5.5rem);
+  font-weight: 900;
+  color: var(--orange);
+  text-shadow: 0 0 10px var(--orange), 0 0 28px var(--orange);
+  animation: sepBlink 1s step-end infinite;
+  line-height: 1;
+  align-self: flex-start;
+  margin-top: clamp(.6rem, 1.8vw, 1.1rem);
+}
+
+@keyframes sepBlink {
+  0%,100% { opacity: 1; }
+  50%      { opacity: .08; }
+}
+
+/* ── DONE ── */
+.done-msg {
+  display: none;
+  font-size: clamp(1.5rem, 5vw, 4rem);
+  font-weight: 900;
+  color: var(--cyan);
+  letter-spacing: .5em;
+  text-shadow: 0 0 20px var(--cyan), 0 0 55px var(--cyan);
+  animation: titlePulse 1s ease-in-out infinite;
+}
+
+/* ── PROGRESS BAR ── */
+.progress-wrap {
+  width: clamp(280px, 60vw, 720px);
+  display: flex; flex-direction: column; gap: .4rem;
+}
+
+.progress-labels {
+  display: flex; justify-content: space-between;
+  font-size: clamp(.4rem, .8vw, .6rem);
+  letter-spacing: .2em;
+  color: rgba(255,255,255,.28);
+}
+
+.bar-outer {
+  height: 3px;
+  background: rgba(255,255,255,.08);
+  border-radius: 2px; overflow: visible;
+  position: relative;
+}
+
+.bar-inner {
+  height: 100%;
+  background: linear-gradient(to right, var(--purple), var(--cyan));
+  border-radius: 2px;
+  box-shadow: 0 0 8px var(--cyan);
+  transition: width 1s linear;
+  position: relative;
+}
+
+.bar-inner::after {
+  content: '';
+  position: absolute; right: -3px; top: 50%;
+  transform: translateY(-50%);
+  width: 7px; height: 7px;
+  background: #fff; border-radius: 50%;
+  box-shadow: 0 0 8px #fff, 0 0 18px var(--cyan);
+}
+
+/* ── MUSIC BUTTON ── */
+.music-btn {
+  position: fixed; bottom: 1.4rem; right: 1.4rem;
+  z-index: 20;
+  background: transparent;
+  border: 1px solid rgba(255,107,53,.45);
+  color: var(--orange);
+  font-family: 'Orbitron', monospace;
+  font-size: .58rem;
+  letter-spacing: .3em;
+  padding: .55rem 1.1rem;
+  cursor: pointer;
+  text-shadow: 0 0 8px var(--orange);
+  box-shadow: 0 0 10px rgba(255,107,53,.25);
+  border-radius: 3px;
+  transition: all .2s;
+}
+
+.music-btn:hover { background: rgba(255,107,53,.12); box-shadow: 0 0 20px rgba(255,107,53,.5); }
+.music-btn.on    { border-color: var(--orange); box-shadow: 0 0 16px rgba(255,107,53,.6), inset 0 0 12px rgba(255,107,53,.08); }
+
+/* ── NOTE RIPPLE ── */
+.note-ripple {
+  position: fixed; inset: 0; z-index: 4; pointer-events: none;
+  border-radius: 50%;
+  animation: ripple .5s ease-out forwards;
+}
+
+@keyframes ripple {
+  0%   { box-shadow: inset 0 0 0 0 rgba(0,229,255,.25); }
+  100% { box-shadow: inset 0 0 0 80px rgba(0,229,255,0); }
+}
+</style>
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+<div class="nebula"></div>
+<div class="scanlines"></div>
+<div class="vignette"></div>
+
+<div class="main">
+  <div class="title">THE FINAL COUNTDOWN</div>
+  <div class="subtitle">T&thinsp;&thinsp;M&thinsp;&thinsp;I&thinsp;&thinsp;N&thinsp;&thinsp;U&thinsp;&thinsp;S</div>
+
+  <div class="clock">
+    <div class="unit">
+      <div class="digit-box"><div class="number" id="days">00</div></div>
+      <div class="label">DAYS</div>
+    </div>
+    <div class="separator">:</div>
+    <div class="unit">
+      <div class="digit-box"><div class="number" id="hours">00</div></div>
+      <div class="label">HOURS</div>
+    </div>
+    <div class="separator">:</div>
+    <div class="unit">
+      <div class="digit-box"><div class="number" id="minutes">00</div></div>
+      <div class="label">MINUTES</div>
+    </div>
+    <div class="separator">:</div>
+    <div class="unit">
+      <div class="digit-box"><div class="number" id="seconds">00</div></div>
+      <div class="label">SECONDS</div>
+    </div>
+  </div>
+
+  <div class="done-msg" id="doneMsg">LAUNCH</div>
+
+  <div class="progress-wrap">
+    <div class="progress-labels">
+      <span>JUN 08 &middot; 09:00</span>
+      <span>JUN 15 &middot; 09:00</span>
+    </div>
+    <div class="bar-outer">
+      <div class="bar-inner" id="progressBar" style="width:0%"></div>
+    </div>
+  </div>
+</div>
+
+<iframe id="yt-frame"
+  style="position:fixed;width:1px;height:1px;opacity:0;top:0;left:0;pointer-events:none;border:0;"
+  allow="autoplay; encrypted-media"
+  allowfullscreen></iframe>
+
+<button class="music-btn" id="musicBtn">&#9834; PLAY MUSIC</button>
+
+<script>
+// ── COUNTDOWN ────────────────────────────────────────────────────────────────
+const START  = new Date('2026-06-08T08:00:00Z'); // 09:00 GMT+1
+const TARGET = new Date('2026-06-15T08:00:00Z'); // 09:00 GMT+1
+const SPAN   = TARGET - START;
+
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function setDigit(id, val) {
+  const el = document.getElementById(id);
+  const s  = pad(val);
+  if (el.textContent !== s) {
+    el.textContent = s;
+    el.classList.remove('flash');
+    void el.offsetWidth; // force reflow
+    el.classList.add('flash');
+  }
+}
+
+function tick() {
+  const now  = new Date();
+  const diff = TARGET - now;
+
+  if (diff <= 0) {
+    ['days','hours','minutes','seconds'].forEach(id => setDigit(id, 0));
+    document.querySelector('.clock').style.opacity = '0.3';
+    document.getElementById('doneMsg').style.display = 'block';
+    document.getElementById('progressBar').style.width = '100%';
+    return;
+  }
+
+  setDigit('days',    Math.floor(diff / 86400000));
+  setDigit('hours',   Math.floor(diff % 86400000 / 3600000));
+  setDigit('minutes', Math.floor(diff % 3600000  / 60000));
+  setDigit('seconds', Math.floor(diff % 60000    / 1000));
+
+  const pct = Math.min(100, Math.max(0, (now - START) / SPAN * 100));
+  document.getElementById('progressBar').style.width = pct + '%';
+}
+
+setInterval(tick, 1000);
+tick();
+
+// ── STARFIELD ────────────────────────────────────────────────────────────────
+const canvas = document.getElementById('starfield');
+const ctx    = canvas.getContext('2d');
+let stars    = [];
+
+function resize() {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  stars = Array.from({ length: 280 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 1.4 + 0.2,
+    a: Math.random(),
+    da: (Math.random() - .5) * .012,
+  }));
+}
+
+function drawStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (const s of stars) {
+    s.a += s.da;
+    if (s.a >= 1)   { s.a = 1;   s.da = -Math.abs(s.da); }
+    if (s.a <= .08) { s.a = .08; s.da =  Math.abs(s.da); }
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,255,255,${s.a.toFixed(3)})`;
+    ctx.fill();
+  }
+  requestAnimationFrame(drawStars);
+}
+
+window.addEventListener('resize', resize);
+resize();
+drawStars();
+
+// ── AUDIO: YouTube embed — Europe "The Final Countdown" ──────────────────────
+let isPlaying = false;
+const YT_ID   = '9jK-NcRmVcw';
+
+function startMusic() {
+  const frame = document.getElementById('yt-frame');
+  frame.src = `https://www.youtube.com/embed/${YT_ID}?autoplay=1&loop=1&playlist=${YT_ID}&controls=0&rel=0&modestbranding=1&iv_load_policy=3`;
+  isPlaying = true;
+  const btn = document.getElementById('musicBtn');
+  btn.innerHTML = '&#9834; MUSIC ON';
+  btn.classList.add('on');
+}
+
+function stopMusic() {
+  const frame = document.getElementById('yt-frame');
+  frame.src = 'about:blank';
+  isPlaying = false;
+  const btn = document.getElementById('musicBtn');
+  btn.innerHTML = '&#9834; PLAY MUSIC';
+  btn.classList.remove('on');
+}
+
+document.getElementById('musicBtn').addEventListener('click', () => {
+  isPlaying ? stopMusic() : startMusic();
+});
+</script>
+</body>
+</html>
